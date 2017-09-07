@@ -1,0 +1,26 @@
+﻿uniform Texture2D image;
+
+
+SamplerState textureSampler {
+	Filter = Linear;
+
+	AddressU = Wrap;
+
+	AddressV = Wrap;
+
+};
+
+struct VertData {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+float4 PSCrop(VertData v_in)
+{
+	return image.Sample(textureSampler, v_in.uv);
+}
+
+float4 main(VertData v_in) : SV_Target
+{
+	return PSCrop(v_in);
+}

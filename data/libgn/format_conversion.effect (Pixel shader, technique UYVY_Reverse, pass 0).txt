@@ -1,0 +1,39 @@
+﻿uniform float width;
+uniform float width_d2;
+uniform float width_d2_i;
+uniform float input_width_i_d2;
+uniform Texture2D image;
+
+
+SamplerState def_sampler {
+	Filter = Linear;
+
+	AddressU = Clamp;
+
+	AddressV = Clamp;
+
+};
+
+struct VertInOut {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+float4 PSPacked422_Reverse(VertInOut vert_in, int u_pos, int v_pos, int y0_pos, int y1_pos)
+{
+	float y = vert_in.uv.y;
+	float odd = floor(fmod(width * vert_in.uv.x +  0.2, 2.0));
+	float x = floor(width_d2 * vert_in.uv.x +  0.2) *
+			width_d2_i;
+
+	x += input_width_i_d2;
+
+	float4 texel = image.Sample(def_sampler, float2(x, y));
+	return float4(odd > 0.5 ? texel[y1_pos] : texel[y0_pos],
+			texel[u_pos], texel[v_pos], 1.0);
+}
+
+float4 main(VertInOut vert_in) : SV_Target
+{
+	return PSPacked422_Reverse(vert_in,2,0,1,3);
+}

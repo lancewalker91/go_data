@@ -1,0 +1,26 @@
+﻿uniform Texture2D image;
+
+
+SamplerState def_sampler {
+	Filter = Linear;
+
+	AddressU = Clamp;
+
+	AddressV = Clamp;
+
+};
+
+struct VertInOut {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+float4 PSDraw(VertInOut vert_in)
+{
+	return float4(image.Sample(def_sampler, vert_in.uv).rgb, 1.0);
+}
+
+float4 main(VertInOut vert_in) : SV_Target
+{
+	return PSDraw(vert_in);
+}

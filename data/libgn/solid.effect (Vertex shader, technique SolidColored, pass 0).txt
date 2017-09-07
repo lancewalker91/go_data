@@ -1,0 +1,21 @@
+﻿uniform float4x4 ViewProj;
+uniform float4 color;
+
+
+struct SolidColoredVertInOut {
+	float4 pos : SV_Position;
+	float4 color : COLOR;
+};
+
+SolidColoredVertInOut VSSolidColored(SolidColoredVertInOut vert_in)
+{
+	SolidColoredVertInOut vert_out;
+	vert_out.pos   = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.color = vert_in.color;
+	return vert_out;
+}
+
+SolidColoredVertInOut main(SolidColoredVertInOut vert_in)
+{
+	return VSSolidColored(vert_in);
+}

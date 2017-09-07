@@ -1,0 +1,17 @@
+﻿uniform float4 color;
+
+
+struct SolidColoredVertInOut {
+	float4 pos : SV_Position;
+	float4 color : COLOR;
+};
+
+float4 PSSolidColored(SolidColoredVertInOut vert_in)
+{
+	return vert_in.color * color;
+}
+
+float4 main(SolidColoredVertInOut vert_in) : SV_Target
+{
+	return PSSolidColored(vert_in);
+}

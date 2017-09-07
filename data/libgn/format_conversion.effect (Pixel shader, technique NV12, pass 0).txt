@@ -1,0 +1,87 @@
+﻿uniform float input_height;
+uniform float width;
+uniform float u_plane_offset;
+uniform float width_i;
+uniform float height_i;
+uniform Texture2D image;
+uniform float height_d2_i;
+
+
+SamplerState def_sampler {
+	Filter = Linear;
+
+	AddressU = Clamp;
+
+	AddressV = Clamp;
+
+};
+
+
+
+
+
+
+struct VertInOut {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+float4 PSNV12(VertInOut vert_in)
+{
+	float v_mul = floor(vert_in.uv.y * input_height);
+
+	float byte_offset = floor((v_mul + vert_in.uv.x) * width) * 4.0;
+	byte_offset +=  0.2;
+
+	float2 sample_pos[4];
+
+	if (byte_offset < u_plane_offset) {
+
+
+		float lum_u = floor(fmod(byte_offset, width)) * width_i;
+		float lum_v = floor(byte_offset * width_i)    * height_i;
+
+		 
+		lum_u += width_i  * 0.5;
+		lum_v += height_i * 0.5;
+
+		sample_pos[0] = float2(lum_u,            lum_v);
+		sample_pos[1] = float2(lum_u += width_i, lum_v);
+		sample_pos[2] = float2(lum_u += width_i, lum_v);
+		sample_pos[3] = float2(lum_u +  width_i, lum_v);
+
+		float4x4 out_val = float4x4(
+			image.Sample(def_sampler, sample_pos[0]),
+			image.Sample(def_sampler, sample_pos[1]),
+			image.Sample(def_sampler, sample_pos[2]),
+			image.Sample(def_sampler, sample_pos[3])
+		);
+
+		return transpose(out_val)[1];
+	} else {
+
+
+		float new_offset = byte_offset - u_plane_offset;
+
+		float ch_u = floor(fmod(new_offset, width)) * width_i;
+		float ch_v = floor(new_offset * width_i)    * height_d2_i;
+		float width_i2 = width_i*2.0;
+
+		 
+		ch_u += width_i;
+		ch_v += height_i;
+
+		sample_pos[0] = float2(ch_u,             ch_v);
+		sample_pos[1] = float2(ch_u + width_i2,  ch_v);
+		
+		return float4(
+				image.Sample(def_sampler, sample_pos[0]).rb,
+				image.Sample(def_sampler, sample_pos[1]).rb
+				);
+	}
+}
+
+float4 main(VertInOut vert_in) : SV_Target
+{
+	return PSNV12(vert_in);
+}

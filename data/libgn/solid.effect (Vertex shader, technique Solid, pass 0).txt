@@ -1,0 +1,18 @@
+﻿uniform float4x4 ViewProj;
+
+
+struct SolidVertInOut {
+	float4 pos : SV_Position;
+};
+
+SolidVertInOut VSSolid(SolidVertInOut vert_in)
+{
+	SolidVertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	return vert_out;
+}
+
+SolidVertInOut main(SolidVertInOut vert_in)
+{
+	return VSSolid(vert_in);
+}

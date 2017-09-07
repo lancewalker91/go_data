@@ -1,0 +1,20 @@
+﻿uniform float4x4 ViewProj;
+
+
+struct VertData {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+VertData VSDefault(VertData v_in)
+{
+	VertData vert_out;
+	vert_out.pos = mul(float4(v_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = v_in.uv;
+	return vert_out;
+}
+
+VertData main(VertData v_in)
+{
+	return VSDefault(v_in);
+}

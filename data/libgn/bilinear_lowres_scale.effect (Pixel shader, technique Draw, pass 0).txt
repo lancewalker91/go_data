@@ -1,0 +1,53 @@
+﻿struct VertData {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+uniform float2 base_dimension_i;
+
+
+uniform Texture2D image;
+
+
+SamplerState textureSampler {
+	Filter = Linear;
+
+	AddressU = Clamp;
+
+	AddressV = Clamp;
+
+};
+
+float4 pixel(float2 uv)
+{
+	return image.Sample(textureSampler, uv);
+}
+
+
+float4 DrawLowresBilinear(VertData v_in)
+{
+	float2 stepxy = base_dimension_i;
+	float4 out_color;
+
+	out_color  = pixel(v_in.uv);
+	out_color += pixel(v_in.uv + float2(-stepxy.x, -stepxy.y));
+	out_color += pixel(v_in.uv + float2(-stepxy.x,       0.0));
+	out_color += pixel(v_in.uv + float2(-stepxy.x,  stepxy.y));
+	out_color += pixel(v_in.uv + float2(      0.0, -stepxy.y));
+	out_color += pixel(v_in.uv + float2(      0.0,  stepxy.y));
+	out_color += pixel(v_in.uv + float2( stepxy.x, -stepxy.y));
+	out_color += pixel(v_in.uv + float2( stepxy.x,       0.0));
+	out_color += pixel(v_in.uv + float2( stepxy.x,  stepxy.y));
+	return out_color / float4(9.0, 9.0, 9.0, 9.0);
+}
+
+
+float4 PSDrawLowresBilinearRGBA(VertData v_in)
+{
+	return DrawLowresBilinear(v_in);
+}
+
+float4 main(VertData v_in) : SV_Target
+{
+	return PSDrawLowresBilinearRGBA(v_in);
+}

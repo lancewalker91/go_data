@@ -1,0 +1,20 @@
+﻿uniform float4x4 ViewProj;
+
+
+struct VertInOut {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+VertInOut main(VertInOut vert_in)
+{
+	return VSDefault(vert_in);
+}

@@ -1,0 +1,69 @@
+﻿uniform float width;
+uniform float height;
+uniform float width_d2;
+uniform float u_plane_offset;
+uniform float v_plane_offset;
+
+
+struct VertInOut {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+uniform float input_width;
+uniform float input_width_i;
+uniform float input_height_i;
+uniform float input_width_i_d2;
+uniform float input_height_i_d2;
+uniform Texture2D image;
+
+
+SamplerState def_sampler {
+	Filter = Linear;
+
+	AddressU = Clamp;
+
+	AddressV = Clamp;
+
+};
+
+float GetOffsetColor(float offset)
+{
+	float2 uv;
+
+	offset +=  0.2;
+	uv.x = floor(fmod(offset, input_width)) * input_width_i;
+	uv.y = floor(offset * input_width_i)    * input_height_i;
+
+	uv.xy += float2(input_width_i_d2, input_height_i_d2);
+
+	return image.Sample(def_sampler, uv).r;
+}
+
+
+float4 PSPlanar420_Reverse(VertInOut vert_in)
+{
+	float x = vert_in.uv.x;
+	float y = vert_in.uv.y;
+	float x_offset   = floor(x * width  +  0.2);
+	float y_offset   = floor(y * height +  0.2);
+
+	float lum_offset = y_offset * width + x_offset +  0.2;
+	lum_offset       = floor(lum_offset);
+
+	float ch_offset  = floor(y_offset * 0.5 +  0.2) * width_d2 +
+		(x_offset * 0.5) +  0.2;
+	ch_offset        = floor(ch_offset);
+
+	return float4(
+		GetOffsetColor(lum_offset),
+		GetOffsetColor(u_plane_offset + ch_offset),
+		GetOffsetColor(v_plane_offset + ch_offset),
+		1.0
+	);
+}
+
+float4 main(VertInOut vert_in) : SV_Target
+{
+	return PSPlanar420_Reverse(vert_in);
+}

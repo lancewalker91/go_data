@@ -1,0 +1,22 @@
+﻿uniform float4x4 ViewProj;
+uniform float2 mul_val;
+uniform float2 add_val;
+
+
+struct VertData {
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+};
+
+VertData VSCrop(VertData v_in)
+{
+	VertData vert_out;
+	vert_out.pos = mul(float4(v_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = v_in.uv * mul_val + add_val;
+	return vert_out;
+}
+
+VertData main(VertData v_in)
+{
+	return VSCrop(v_in);
+}
